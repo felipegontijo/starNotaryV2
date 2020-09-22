@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.5.0;
+pragma solidity >=0.6.0;
 
-import '../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol';
+import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 
 contract StarNotary is ERC721 {
     
@@ -9,8 +9,10 @@ contract StarNotary is ERC721 {
         string name;
     }
 
-    mapping(uint256 => Star) public tokenIdToStarInfo;
-    mapping(uint256 => uint256) public starsForSale;
+    constructor(Star) public ERC721(Star, 'STR') {}
+
+    mapping(uint256 => Star) public tokenIdToStarInfo; // starID --> star
+    mapping(uint256 => uint256) public starsForSale;   // starID --> starPrice
 
 
     // Create Star using the Struct
@@ -37,7 +39,7 @@ contract StarNotary is ERC721 {
         uint256 starCost = starsForSale[_tokenId];
         address ownerAddress = ownerOf(_tokenId);
         require(msg.value > starCost, "You need to have enough Ether");
-        _transferFrom(ownerAddress, msg.sender, _tokenId); // We can't use _addTokenTo or_removeTokenFrom functions, now we have to use _transferFrom
+        safeTransferFrom(ownerAddress, msg.sender, _tokenId); // We can't use _addTokenTo or_removeTokenFrom functions, now we have to use _transferFrom
         address payable ownerAddressPayable = _make_payable(ownerAddress); // We need to make this conversion to be able to use transfer() function to transfer ethers
         ownerAddressPayable.transfer(starCost);
         if(msg.value > starCost) {
